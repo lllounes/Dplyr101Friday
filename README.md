@@ -1,3 +1,2 @@
 # Dplyr101Friday
-By Lounès AÏT KARROU.  
-Commit
+By Lounès AÏT KARROU. (Commit)
