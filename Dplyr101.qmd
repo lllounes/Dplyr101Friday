@@ -1,0 +1,165 @@
+---
+title: "Dplyr"
+format: html
+editor: visual
+---
+
+```{r}
+library(here)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+theme_set(theme_bw())
+here::i_am("Dplyr101Friday.Rproj")
+```
+
+## Exercise 1
+
+```{r}
+spotify <-readRDS(here("topspotify.Rds"))
+```
+
+### Question 1
+
+```{r}
+NumbSongs <- nrow(spotify %>% distinct(song, artist)) 
+NumbArtists <- nrow(spotify %>% distinct(artist))
+NumbGenres <- nrow(spotify %>% distinct(genre))
+```
+
+The data set contains `r NumbSongs` songs, `r NumbArtists` artists and `r NumbGenres` genres.
+
+### Question 2
+
+```{r}
+spotify |>
+  group_by(year) |>
+  distinct(artist) |>
+  summarise(Total=n()) |>
+  knitr::kable()
+```
+
+### Question 3
+
+```{r}
+MostPopArtist<-
+  spotify|>
+  group_by(artist)|>
+  summarise(Num_Songs = n_distinct(song)) |>
+  arrange(desc(Num_Songs))|>
+  slice(1)|>
+  pull(artist)
+```
+
+```{r}
+NumberSongs<-
+  spotify|>
+  group_by(artist)|>
+  summarise(Num_Songs = n_distinct(song)) |>
+  arrange(desc(Num_Songs))|>
+  slice(1)|>
+  pull(Num_Songs)
+```
+
+The most popular artist in this data set is `r MostPopArtist` with `r NumberSongs` songs.
+
+### Question 4
+
+```{r}
+spotify|>
+  group_by(genre)|>
+  summarise(MinimumTempo=min(tempo),
+            MaximumTemp=max(tempo),
+            MeanTempo=mean(tempo),
+            MedianTempo=median(tempo),
+            NumerOfSongs=n())|>
+  knitr::kable()
+```
+
+### Question 5
+
+```{r}
+spotify|>
+  group_by(year)|>
+  summarise(MeanLiveness=mean(liveness),
+            MeanDanceability=mean(danceability))|>
+  knitr::kable()
+```
+
+### Question 6
+
+```{r}
+spotify |>
+group_by(year)|>
+  summarise(MeanLiv=(mean(liveness)),
+    MeanDance=(mean(danceability)))|>
+  ggplot(aes(x=year, y=MeanLiv, color=MeanDance))+ 
+  geom_line()
+```
+
+## Exercise 2
+
+```{r}
+dropout <-readRDS(here("dropout.Rds"))
+```
+
+### Question 1
+
+```{r}
+dropout |>
+  group_by(`Marital status`, Target) |>
+  summarise(Med=median(`Admission grade`)) |>
+  knitr::kable()
+```
+
+### Question 2
+
+```{r}
+dropout |>
+  group_by(`Marital status`, Target) |>
+  summarise(Med=median(`Admission grade`)) |>
+  select(`Marital status`, Target, Med) |>
+  pivot_wider(values_from = Med, names_from = Target) |>
+  knitr::kable()
+```
+
+### Question 3
+
+```{r}
+dropout|>
+  group_by(Gender)|>
+  summarise_at(vars(starts_with("Curricular units")), mean)
+
+```
+
+### Question 4
+
+```{r}
+long <- dropout|>
+  select(starts_with("Curricular units 1st sem"), Gender) |>
+  pivot_longer(cols = starts_with("Curricular units 1st sem"),
+    names_to = "Units",
+    values_to = "Value")
+
+wide <- long |>
+  group_by(Units, Gender)|>
+  summarise(Median_val= median(Value,na.rm=TRUE), .groups='drop')|>
+  pivot_wider(names_from = Gender, values_from = Median_val
+  )
+  
+knitr::kable(wide, digits = 2)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
